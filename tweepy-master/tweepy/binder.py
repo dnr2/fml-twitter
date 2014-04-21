@@ -6,10 +6,8 @@ import httplib
 import urllib
 import time
 import re
-import os
 from StringIO import StringIO
 import gzip
-from progressbar import ProgressBar
 
 from tweepy.error import TweepError
 from tweepy.utils import convert_to_utf8_str
@@ -44,6 +42,7 @@ def bind_api(**config):
             self.retry_errors = kargs.pop('retry_errors', api.retry_errors)
             self.wait_on_rate_limit = kargs.pop('wait_on_rate_limit', api.wait_on_rate_limit)
             self.wait_on_rate_limit_notify = kargs.pop('wait_on_rate_limit_notify', api.wait_on_rate_limit_notify)
+            self.parser = kargs.pop('parser', api.parser)
             self.headers = kargs.pop('headers', {})
             self.build_parameters(args, kargs)
 
@@ -71,7 +70,6 @@ def bind_api(**config):
             # This causes Twitter to issue 301 redirect.
             # See Issue https://github.com/tweepy/tweepy/issues/12
             self.headers['Host'] = self.host
-
             # Monitoring rate limits
             self._remaining_calls = None
             self._reset_time = None
@@ -81,7 +79,6 @@ def bind_api(**config):
             for idx, arg in enumerate(args):
                 if arg is None:
                     continue
-
                 try:
                     self.parameters[self.allowed_param[idx]] = convert_to_utf8_str(arg)
                 except IndexError:
@@ -146,13 +143,8 @@ def bind_api(**config):
                     sleep_time = self._reset_time - int(time.time())
                     if sleep_time > 0:
                         if self.wait_on_rate_limit_notify:
-                          print "Max retries reached. Sleeping for: " + str(sleep_time)
-                          with ProgressBar(maxval= sleep_time+5) as progress:
-                            for i in range(sleep_time+5):
-                              time.sleep(1)
-                              progress.update(i)
-                        else:
-                          time.sleep(sleep_time + 5) # sleep for few extra sec
+                            print "Max retries reached. Sleeping for: " + str(sleep_time)
+                        time.sleep(sleep_time + 5) # sleep for few extra sec
 
                 # Open connection
                 if self.api.secure:
@@ -177,7 +169,6 @@ def bind_api(**config):
                     resp = conn.getresponse()
                 except Exception as e:
                     raise TweepError('Failed to send request: %s' % e)
-
                 rem_calls = resp.getheader('x-rate-limit-remaining')
                 if rem_calls is not None:
                     self._remaining_calls = int(rem_calls)
@@ -188,7 +179,6 @@ def bind_api(**config):
                     self._reset_time = int(reset_time)
                 if self.wait_on_rate_limit and self._remaining_calls == 0 and (resp.status == 429 or resp.status == 420): # if ran out of calls before waiting switching retry last call
                     continue
-
                 retry_delay = self.retry_delay
                 # Exit request loop if non-retry error code
                 if resp.status == 200:
@@ -207,7 +197,7 @@ def bind_api(**config):
             self.api.last_response = resp
             if resp.status and not 200 <= resp.status < 300:
                 try:
-                    error_msg = self.api.parser.parse_error(resp.read())
+                    error_msg = self.parser.parse_error(resp.read())
                 except Exception:
                     error_msg = "Twitter error response: status code = %s" % resp.status
                 raise TweepError(error_msg, resp)
@@ -220,7 +210,8 @@ def bind_api(**config):
                     body = zipper.read()
                 except Exception as e:
                     raise TweepError('Failed to decompress data: %s' % e)
-            result = self.api.parser.parse(self, body)
+            
+            result = self.parser.parse(self, body)
 
             conn.close()
 
@@ -233,8 +224,10 @@ def bind_api(**config):
     def _call(api, *args, **kargs):
 
         method = APIMethod(api, args, kargs)
-        return method.execute()
-
+        if kargs.get('create'):
+            return method
+        else:
+            return method.execute()
 
     # Set pagination mode
     if 'cursor' in APIMethod.allowed_param:
