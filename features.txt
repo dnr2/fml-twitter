@@ -1,0 +1,16 @@
+List of features to collect from user:
+  contributors_enabled
+  created_at
+  default_profile
+  default_profile_image
+  description
+  entitites
+  favorites_count
+  followers_count
+  friends_count
+  geo_enabled
+  listed_count
+  statuses_count
+
+List of features to collect from tweet:
+  
