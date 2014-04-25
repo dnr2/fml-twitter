@@ -13,4 +13,20 @@ List of features to collect from user:
   statuses_count
 
 List of features to collect from tweet:
-  
+  num hashtags
+  num symbols
+  num urls
+  num user_mentions
+  favorite_count
+  retweet_count
+  source
+  truncated
+
+List of features to collect from tweets:
+  average time between tweets
+  average/sum hashtags
+  average/sum symbols
+  average/sum urls
+  average/sum user_mentions
+  average/sum favorites
+  average/sum retweet_count
