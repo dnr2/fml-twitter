@@ -45,13 +45,13 @@ def extract_tweets_features(filepath, classification):
       print tweet_count
       break
 
-  hashtag_avg = hashtag_count / tweet_count
-  symbols_avg = symbols_avg / tweet_count
-  urls_avg = urls_avg / tweet_count
-  user_mentions_avg = user_mentions_avg / tweet_count
-  favorite_avg =  favorite_count / tweet_count
-  retweet_avg = retweet_count / tweet_count
-  truncated_avg = truncated_avg / tweet_count
+  hashtag_avg = hashtag_count / float(tweet_count)
+  symbols_avg = symbols_avg / float(tweet_count)
+  urls_avg = urls_avg / float(tweet_count)
+  user_mentions_avg = user_mentions_avg / float(tweet_count)
+  favorite_avg =  favorite_count / float(tweet_count)
+  retweet_avg = retweet_count / float(tweet_count)
+  truncated_avg = truncated_avg / float(tweet_count)
 
   resultString =( str(hashtag_count) + "," + str(hashtag_avg) + ","
                 + str(symbols_count) + "," + str(symbols_avg) + ","
