@@ -22,7 +22,6 @@ def extract_tweets_features(filepath, classification):
   user_mentions_avg = 0
   favorite_avg = 0
   retweet_avg = 0
-  truncated_avg = 0
 
   for tweet_count in range(1, 200):
     try:
@@ -39,8 +38,6 @@ def extract_tweets_features(filepath, classification):
       favorite_count += tweet.favorite_count
       # retweet_count
       retweet_count += tweet.retweet_count
-      # truncated
-      truncated_count += tweet.truncated
     except EOFError:
       print tweet_count
       break
@@ -51,15 +48,13 @@ def extract_tweets_features(filepath, classification):
   user_mentions_avg = user_mentions_avg / float(tweet_count)
   favorite_avg =  favorite_count / float(tweet_count)
   retweet_avg = retweet_count / float(tweet_count)
-  truncated_avg = truncated_avg / float(tweet_count)
 
   resultString =( str(hashtag_count) + "," + str(hashtag_avg) + ","
                 + str(symbols_count) + "," + str(symbols_avg) + ","
                 + str(urls_count) + "," + str(urls_avg) + ","
                 + str(user_mentions_count) + "," + str(user_mentions_avg) + ","
                 + str(favorite_count) + ","+ str(favorite_avg) + ","
-                + str(retweet_count) + "," + str(retweet_avg) + ","
-                + str(truncated_count) + "," + str(truncated_avg))
+                + str(retweet_count) + "," + str(retweet_avg))
 
   return resultString
 
