@@ -1,3 +1,26 @@
+data.csv order:
+
+verified,
+followers_count,
+friends_count,
+listed_count,
+statuses_count,
+contributors_enabled,
+created_at,
+geo_enabled,
+hashtag_count,
+symbols_count,
+urls_count,
+user_mentions_count,
+favorite_count,
+retweet_count,
+hashtag_avg,
+symbols_avg,
+urls_avg,
+user_mentions_avg,
+favorite_avg,
+retweet_avg,
+
 List of features to collect from user:
   contributors_enabled
   created_at
