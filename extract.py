@@ -77,12 +77,12 @@ def extract_info_features(filepath, classification):
     #statuses_count
     resultString += str(info.statuses_count) + ","
     
-    #statuses_count
-    resultString += str(info.contributors_enabled) + ","
-    #statuses_count - number of days from 1 Nov 2005, before creation of twitter
+    #contributors_enabled
+    resultString += str( "1" if info.contributors_enabled else "0" ) + ","
+    #created_at - number of days from 1 Nov 2005, before creation of twitter
     resultString += str( (info.created_at - datetime.datetime.strptime("1 Nov 05", "%d %b %y")).days ) + ","
-    #statuses_count
-    resultString += str(info.geo_enabled) + ","
+    #geo_enabled
+    resultString += str( "1" if info.geo_enabled else "0" ) + ","
     
     return resultString
 
