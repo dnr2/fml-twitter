@@ -3,6 +3,8 @@ import os
 import pickletools
 import cPickle as pickle
 import pprint
+import datetime
+import time
 
 def extract_tweets_features(filepath, classification):
 
@@ -69,6 +71,11 @@ def extract_info_features(filepath, classification):
     info = pickle.load(file)
     #followers_count
     resultString += str(info.followers_count) + ","
+    #age of account since twitter
+    print type(info.created_at)
+    timeDelta = datetime.timedelta(info.created_at - time.strptime("1 Nov 05", "%d %b %y") ).days
+    pprint.pprint(timeDelta)
+    resultString += str(timeDelta) + ","
     #friends_count
     resultString += str(info.friends_count) + ","
     #listed_count
