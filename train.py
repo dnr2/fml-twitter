@@ -8,7 +8,7 @@ from sklearn import datasets
 from sklearn.ensemble import AdaBoostClassifier
 
 
-model_type  = "adaboost" # svm
+model_type  = "adaboost" # adaboost / svm / ...
 
 data = np.genfromtxt('data.csv', delimiter=',')
 feature_array = np.delete(data, 0, 1)
