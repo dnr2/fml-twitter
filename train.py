@@ -1,29 +1,14 @@
-from sklearn.naive_bayes import GaussianNB
+from sklearn import svm
 import pandas as pd
 import numpy as np
+import pprint
 
-# create data frame containing your data, each column can be accessed # by df['column   name']
-df = pd.read_csv('data.csv')
+data = np.genfromtxt('data.csv', delimiter=',')
+feature_array = np.delete(data, 0, 1)
+class_array = np.genfromtxt('data.csv', delimiter=',', usecols=([0]))
 
-target_names = np.array(['Positives','Negatives'])
+pprint.pprint(feature_array)
+pprint.pprint(class_array)
 
-# add columns to your data frame
-df['is_train'] = np.random.uniform(0, 1, len(df)) <= 0.75
-df['Type'] = pd.Factor(targets, target_names)
-df['Targets'] = targets
-
-# define training and test sets
-train = df[df['is_train']==True]
-test = df[df['is_train']==False]
-
-trainTargets = np.array(train['Targets']).astype(int)
-testTargets = np.array(test['Targets']).astype(int)
-
-# columns you want to model
-features = df.columns[0:7]
-
-# call Gaussian Naive Bayesian class with default parameters
-gnb = GaussianNB()
-
-# train model
-y_gnb = gnb.fit(train[features], trainTargets).predict(train[features])
+classifier = svm.SVC(verbose=True)
+classifier.fit(feature_array, class_array)

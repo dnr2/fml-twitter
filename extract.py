@@ -71,10 +71,6 @@ def extract_info_features(filepath, classification):
     info = pickle.load(file)
     #followers_count
     resultString += str(info.followers_count) + ","
-    #age of account since twitter
-    print type(info.created_at)
-    timeDelta = datetime.timedelta(info.created_at - time.strptime("1 Nov 05", "%d %b %y") ).days
-    pprint.pprint(timeDelta)
     resultString += str(timeDelta) + ","
     #friends_count
     resultString += str(info.friends_count) + ","
@@ -82,7 +78,6 @@ def extract_info_features(filepath, classification):
     resultString += str(info.listed_count) + ","
     #statuses_count
     resultString += str(info.statuses_count) + ","
-
     #contributors_enabled
     resultString += str( "1" if info.contributors_enabled else "0" ) + ","
     #created_at - number of days from 1 Nov 2005, before creation of twitter
