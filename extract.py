@@ -4,10 +4,7 @@ import pickletools
 import cPickle as pickle
 import pprint
 import datetime
-<<<<<<< HEAD
 import time
-=======
->>>>>>> 0cce8c4fb477e18966fa3e3578cd8b5fcc317505
 
 def extract_tweets_features(filepath, classification):
 
@@ -27,7 +24,7 @@ def extract_tweets_features(filepath, classification):
   user_mentions_avg = 0
   favorite_avg = 0
   retweet_avg = 0
-  
+
   for tweet_count in range(1, 200):
     try:
       tweet = unpickler.load()
@@ -85,14 +82,14 @@ def extract_info_features(filepath, classification):
     resultString += str(info.listed_count) + ","
     #statuses_count
     resultString += str(info.statuses_count) + ","
-    
+
     #contributors_enabled
     resultString += str( "1" if info.contributors_enabled else "0" ) + ","
     #created_at - number of days from 1 Nov 2005, before creation of twitter
     resultString += str( (info.created_at - datetime.datetime.strptime("1 Nov 05", "%d %b %y")).days ) + ","
     #geo_enabled
     resultString += str( "1" if info.geo_enabled else "0" ) + ","
-    
+
     return resultString
 
 if __name__ == "__main__":
