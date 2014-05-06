@@ -8,12 +8,14 @@ TODO:
 
 
 
-1 - Grid search to find the best numerical features
-2 - separate the data in training and test sets
-3 - NLP
-	3.1 - Analyse the user names using n-grams
-	3.2 - Analyse the description
-	3.3 - Analyse the tweets (?)
-4 - Do graph analysis
-5 - Create the APP
+# Grid search to find the best numerical features (DONE!)
+# separate the data in training and test sets (DONE!)
+# Implement more algorithms (So far: SVM, Adaboost)
+# Create Slides (Cody doing)
+# NLP
+	Analyse the user names using n-grams
+	Analyse the description
+	Analyse the tweets (?)
+# Do graph analysis
+# Create the APP
 
