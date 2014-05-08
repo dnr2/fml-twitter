@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import pylab as pl
 import pprint
+import csv
+import sqlite3
 
 from sklearn import svm
 from sklearn import cross_validation
@@ -15,11 +17,12 @@ from sklearn import svm, datasets
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import auc
 
-
-model_type  = "adaboost" # adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
+names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"]
+#model_type  = "adaboost" # adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
 cv_folds = 10 #number of cross validation folds
-use_CV = False #use cross validation
-create_PR = True
+use_CV = True #use cross validation
+
+
 
 training_data = np.genfromtxt('traindata.csv', delimiter=',')
 np.random.shuffle(training_data)
@@ -31,19 +34,26 @@ training_Y = training_data[:,0]
 testing_X = testing_data[:,1:19]
 testing_Y = testing_data[:,0]
 
-if model_type == "svm" :
-    clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
-if model_type == "adaboost" :
-    clf = AdaBoostClassifier(n_estimators=200)
-if model_type == "stochastic_gradient_descent" :
-    clf = SGDClassifier(loss="hinge", penalty="l2")
-if model_type == "nearestneighbor" :
-    clf = NearestCentroid()
-if model_type == "decision_tree" :
-    clf = tree.DecisionTreeClassifier()
-
 if use_CV :
-  pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
+    print 'Cross validation table'
+    for name in names :
+        if name == "svm" :
+            clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
+        if name == "adaboost" :
+            clf = AdaBoostClassifier(n_estimators=200)
+        if name == "stochastic_gradient_descent" :
+            clf = SGDClassifier(loss="hinge", penalty="l2")
+        if name == "nearestneighbor" :
+            clf = NearestCentroid()
+        if name == "decision_tree" :
+            clf = tree.DecisionTreeClassifier()
+        a = {}
+        a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
+        print name,a[name]
+
+
+#pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
+
 else :
   pprint.pprint( clf.fit(training_X, training_Y).score(testing_X , testing_Y) )
 if create_PR:
