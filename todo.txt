@@ -1,3 +1,0 @@
-should normalize data?
-
-extract time between tweets

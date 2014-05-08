@@ -48,8 +48,8 @@ def process_user(user):
 class StreamListener(tweepy.StreamListener):
     def on_status(self, tweet):
         if not tweet.user.verified:
+          print str(tweet.user.screen_name)
           process_user(tweet.user)
-          time.sleep(5)
 
 l = StreamListener()
 streamer = tweepy.Stream(auth=auth, listener=l)
