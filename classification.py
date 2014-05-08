@@ -17,6 +17,7 @@ cv_folds = 10 #number of cross validation folds
 use_CV = False #use cross validation
 
 training_data = np.genfromtxt('traindata.csv', delimiter=',')
+np.random.shuffle(training_data)
 testing_data = np.genfromtxt('testdata.csv', delimiter=',')
 
 training_X = training_data[:,1:19]
@@ -35,10 +36,8 @@ if model_type == "nearestneighbor" :
     clf = NearestCentroid()
 if model_type == "decision_tree" :
     clf = tree.DecisionTreeClassifier()
-  
+
 if use_CV :
   pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
 else :
   pprint.pprint( clf.fit(training_X, training_Y).score(testing_X , testing_Y) )
-  
-
