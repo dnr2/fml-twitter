@@ -1,11 +1,13 @@
 import pandas as pd
 import numpy as np
 import pprint
+import pylab as pl
 
 from sklearn import svm
 from sklearn import cross_validation
 from sklearn import datasets
 from sklearn.ensemble import AdaBoostClassifier
+from sklearn.metrics import confusion_matrix
 
 '''
 
@@ -60,27 +62,48 @@ features = [
 
 sorted_features  = []
 
-class_array = np.genfromtxt('data.csv', delimiter=',', usecols=([0]))
+training_data = np.genfromtxt('data.csv', delimiter=',')
+np.random.shuffle(training_data)
 
 for column in range( 1, 20 ) :
   print features[column]
   # get only one column of the training data
-  feature_array  = np.genfromtxt('data.csv', delimiter=',', usecols=([0,column]))
-  feature_array = np.delete(feature_array, 0, 1)
-  
-  pprint.pprint( feature_array )
-  
+  feature_array  = training_data[:,[column]]
+  class_array = training_data[:,0]
+
   if model_type == "svm" :
     clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True ).fit(feature_array, class_array)
   if model_type == "adaboost" :
-    clf = AdaBoostClassifier(n_estimators=10)
+    clf = AdaBoostClassifier(n_estimators=200)
 
-  accuracy =  np.mean(cross_validation.cross_val_score(clf, feature_array, class_array, cv=10)) 
+  accuracy =  np.mean(cross_validation.cross_val_score(clf, feature_array, class_array, cv=10))
   sorted_features.append( ( accuracy, features[column] , column) );
   pprint.pprint( accuracy )
 
-  
+
 sorted_features.sort(key=lambda tup: tup[0])
+
+training_data = np.genfromtxt('traindata.csv', delimiter=',')
+np.random.shuffle(training_data)
+testing_data = np.genfromtxt('testdata.csv', delimiter=',')
+
+training_X = training_data[:,1:19]
+training_Y = training_data[:,0]
+
+testing_X = testing_data[:,1:19]
+testing_Y = testing_data[:,0]
+
+y_pred = clf.fit(training_X, training_Y).predict(testing_X)
+cm = confusion_matrix(testing_Y, y_pred)
+print(cm)
+# Show confusion matrix in a separate window
+
+pl.matshow(cm)
+pl.title('Confusion matrix')
+pl.colorbar()
+pl.ylabel('True label')
+pl.xlabel('Predicted label')
+pl.show()
 
 for tup in sorted_features:
   print "feature #" + str(tup[2]) + " " + str(tup[1]) + "\t" + str(tup[0])

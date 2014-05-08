@@ -50,6 +50,29 @@ class StreamListener(tweepy.StreamListener):
         if not tweet.user.verified:
           print str(tweet.user.screen_name)
           process_user(tweet.user)
+    def on_connect(self):
+      print "Connected"
+    def on_disconnect(self, notice):
+      """Called when twitter sends a disconnect notice
+      Disconnect codes are listed here:
+      https://dev.twitter.com/docs/streaming-apis/messages#Disconnect_messages_disconnect
+      """
+      print notice
+      return
+    def on_limit(self, track):
+        """Called when a limitation notice arrvies"""
+        print "limit notice arrived"
+        return
+
+    def on_error(self, status_code):
+        """Called when a non-200 status code is returned"""
+        print status_code
+        return False
+
+    def on_timeout(self):
+        """Called when stream connection times out"""
+        print "Time out"
+        return
 
 l = StreamListener()
 streamer = tweepy.Stream(auth=auth, listener=l)
