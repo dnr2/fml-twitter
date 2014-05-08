@@ -21,7 +21,7 @@ names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tr
 #model_type  = "adaboost" # adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
 cv_folds = 10 #number of cross validation folds
 use_CV = True #use cross validation
-
+create_PR = False
 
 
 training_data = np.genfromtxt('traindata.csv', delimiter=',')
