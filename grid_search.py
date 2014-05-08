@@ -60,26 +60,25 @@ features = [
 
 sorted_features  = []
 
-class_array = np.genfromtxt('data.csv', delimiter=',', usecols=([0]))
+training_data = np.genfromtxt('data.csv', delimiter=',')
+np.random.shuffle(training_data)
 
 for column in range( 1, 20 ) :
   print features[column]
   # get only one column of the training data
-  feature_array  = np.genfromtxt('data.csv', delimiter=',', usecols=([0,column]))
-  feature_array = np.delete(feature_array, 0, 1)
-  
-  pprint.pprint( feature_array )
-  
+  feature_array  = training_data[:,[column]]
+  class_array = training_data[:,0]
+
   if model_type == "svm" :
     clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True ).fit(feature_array, class_array)
   if model_type == "adaboost" :
-    clf = AdaBoostClassifier(n_estimators=10)
+    clf = AdaBoostClassifier(n_estimators=200)
 
-  accuracy =  np.mean(cross_validation.cross_val_score(clf, feature_array, class_array, cv=10)) 
+  accuracy =  np.mean(cross_validation.cross_val_score(clf, feature_array, class_array, cv=10))
   sorted_features.append( ( accuracy, features[column] , column) );
   pprint.pprint( accuracy )
 
-  
+
 sorted_features.sort(key=lambda tup: tup[0])
 
 for tup in sorted_features:
