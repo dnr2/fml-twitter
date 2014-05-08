@@ -11,10 +11,12 @@ TODO:
 # Implement more algorithms (So far: SVM, Adaboost)
 # Create Slides (Cody doing)
 # graphs and Tables
-	Confusion Matrix
-	Accuracy
-	ROC curve
+	Confusion Matrix (for the 2 best and 2 worse features)
+	Accuracy (comparison between algorithms)
+	ROC curve (?)
 # NLP
+	Q: how to extract features considering the different possible languages the user speak?
+	Q: how to extract features considering the use of symbols, 
 	Analyse the user names using n-grams
 	Analyse the description
 	Analyse the tweets (?)
