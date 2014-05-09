@@ -16,6 +16,7 @@ from sklearn import tree
 from sklearn import svm, datasets
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import auc
+from sklearn.externals import joblib
 
 
 names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"]
@@ -23,6 +24,7 @@ names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tr
 cv_folds = 10 #number of cross validation folds
 use_CV = True #use cross validation
 create_PR = False
+save_Classifer = True
 
 
 training_data = np.genfromtxt('traindata.csv', delimiter=',')
@@ -49,7 +51,7 @@ if use_CV :
             clf = NearestCentroid()
         if name == "decision_tree" :
             clf = tree.DecisionTreeClassifier()
-    
+
         a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
         print name,a[name]
 
@@ -75,3 +77,5 @@ if create_PR:
   pl.title('Precision-Recall example: AUC=%0.2f' % area)
   pl.legend(loc="lower left")
   pl.show()
+if save_Classifer:
+  joblib.dump(clf, name+'_classifier.pkl') 
