@@ -8,7 +8,7 @@ TODO:
 
 # Grid search to find the best numerical features (DONE!)
 # separate the data in training and test sets (DONE!)
-# Implement more algorithms (So far: SVM, Adaboost)
+# Implement more algorithms (So far: SVM, Adaboost, stochastic_gradient_descent, nearestneighbor, decision_tree)
 # Create Slides (Cody doing)
 # graphs and Tables
 	Confusion Matrix (for the 2 best and 2 worse features)

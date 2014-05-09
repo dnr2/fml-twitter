@@ -6,6 +6,23 @@ import pprint
 import datetime
 import time
 
+from sklearn.feature_extraction.text import TfidfTransformer
+
+"""
+NLP FEATURES: 
+
+features from the user:
+- description
+- lang (user's self-declared user interface language)
+- screen_name
+
+features from the tweets
+- lang (machine-detected language of the Tweet text)
+- text ( The actual UTF-8 text of the status update ) 
+"""
+use_nlp = True #extract natural language features from the description
+transformer = TfidfTransformer() 
+
 def extract_tweets_features(filepath, classification):
 
   file = open(filepath, 'rb')
@@ -59,8 +76,8 @@ def extract_tweets_features(filepath, classification):
                 + str(retweet_count) + "," + str(retweet_avg))
 
   return resultString
-
-
+  
+  
 def extract_info_features(filepath, classification):
   if classification == "verified":
     resultString = "1,"
@@ -83,12 +100,24 @@ def extract_info_features(filepath, classification):
     resultString += str( (info.created_at - datetime.datetime.strptime("1 Nov 05", "%d %b %y")).days ) + ","
     #geo_enabled
     resultString += str( "1" if info.geo_enabled else "0" ) + ","
-
+    
+    #create features from user description
+    if use_nlp :
+      if info.lang == "en" and ( info.description is not None ) : # only add user with descriptions in English
+        resultString + str(info.description.encode('ascii', 'ignore')).translate( None, ',') + ","
+        # pprint.pprint( classification + " " + info.name + " ==> " + str(info.description.encode('ascii', 'ignore')).translate( None, ',') )
+      else :
+        return ""         
     return resultString
 
 if __name__ == "__main__":
+  
   #create csv file
-  with open("data.csv", 'w') as newFile:
+  filename = "data.csv"
+  if use_nlp :
+    filename = "data_nlp.csv"
+  
+  with open(filename, 'w') as newFile:
     for directory in os.listdir("verified/"):
       featureString = ""
       infoFeatures = ""
@@ -102,6 +131,8 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("verified/"+directory+"/"+file, "verified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("verified/"+directory+"/"+file, "verified").rstrip()
+      if featureString == "" or tweetsFeatures == "" :
+        continue
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
     for directory in os.listdir("unverified/"):
@@ -117,5 +148,7 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("unverified/"+directory+"/"+file, "unverified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("unverified/"+directory+"/"+file, "unverified").rstrip()
+      if featureString == "" or tweetsFeatures == "" :
+        continue 
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
