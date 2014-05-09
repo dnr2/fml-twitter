@@ -17,6 +17,7 @@ from sklearn import svm, datasets
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import auc
 
+
 names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"]
 #model_type  = "adaboost" # adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
 cv_folds = 10 #number of cross validation folds
@@ -36,6 +37,7 @@ testing_Y = testing_data[:,0]
 
 if use_CV :
     print 'Cross validation table'
+    a = {}
     for name in names :
         if name == "svm" :
             clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
@@ -47,10 +49,9 @@ if use_CV :
             clf = NearestCentroid()
         if name == "decision_tree" :
             clf = tree.DecisionTreeClassifier()
-        a = {}
+    
         a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
         print name,a[name]
-
 
 #pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
 
