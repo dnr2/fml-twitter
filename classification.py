@@ -20,43 +20,41 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.externals import joblib
 
 #possible names = "adaboost" , "stochastic_gradient_descent" , "nearestneighbor", "decision_tree" 
-names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"] #classifiers used for cross validation
+# names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"] #classifiers used for cross validation
+names = ["adaboost"] #classifiers used for cross validation
 name = "adaboost" #classifier used for testing
 cv_folds = 10 #number of cross validation folds
 use_CV = False #use cross validation
 create_PR = False #Precision Recall
-save_Classifer = True 
-use_nlp = False #use natural language processing analysis
+save_Classifer = False 
+use_nlp = True #use natural language processing analysis
 
 training_data = np.genfromtxt('traindata.csv', delimiter=',')
 np.random.shuffle(training_data)
 testing_data = np.genfromtxt('testdata.csv', delimiter=',')
 
-training_X = training_data[:,1:19]
+training_X = training_data[:,1:]
 training_Y = training_data[:,0]
 
-testing_X = testing_data[:,1:19]
+testing_X = testing_data[:,1:]
 testing_Y = testing_data[:,0]
 
-
 #add nlp features (under construction)
-if use_nlp : 
-  nlp_features_columns = [8]
-  #TODO change that 
-  use_CV = True
-  deletethis = pd.read_table('data_nlp.csv', delimiter=',', dtype=None)
-  pprint.pprint( deletethis )
-  training_data = np.array( deletethis )
-  pprint.pprint( training_data )
-  np.random.shuffle(training_data)
-  training_X = training_data[:,nlp_features_columns]
-  training_Y = training_data[:,0]
-  pprint.pprint( training_X )
-  ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1, 2), min_df=1)
-  counts = ngram_vectorizer.fit_transform(training_X[:,0] )
-  pprint.pprint( ngram_vectorizer.get_feature_names() )
-  training_X = counts.toarray()
+if use_nlp :
 
+  #TODO using CV while I don't split nlp data into training and testing, must change that later
+  use_CV = True  
+  # training_data  = np.array( pd.read_csv( 'data_nlp.csv', sep=',', quotechar="\""))
+  training_data  = np.array( pd.read_csv( 'data_nlp.csv', sep=','))
+
+  training_X = training_data[:,2:].astype(float)
+  training_Y = training_data[:,0].astype(float)
+  nlp_features = training_data[:,1]
+  ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,4), min_df=1)
+  counts = ngram_vectorizer.fit_transform( nlp_features )  
+  training_X = np.array(counts.toarray()).astype(float)  
+  pprint.pprint( training_X.shape )
+  
 if use_CV :
   print 'Cross validation table'
   a = {}

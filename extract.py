@@ -94,6 +94,18 @@ def extract_info_features(filepath, classification):
     except Exception, e:
       pprint.pprint("bug in" + filepath)
       return ""
+      
+    #create features from user description
+    if use_nlp :
+      if info.lang[:2] == "en" and ( info.description is not None ) : # only add user with descriptions in English
+        description = str(info.description.encode('ascii', 'ignore'))
+        #remove undesired characters
+        description = description.replace(",","").replace('\n','').replace("\r","").replace("\t","")        
+        
+        resultString += description + ","
+        # pprint.pprint( classification + " " + info.name + " ==> " + str(info.description.encode('ascii', 'ignore')).translate( None, ',') )
+      else :
+        return ""
     
     #followers_count
     resultString += str(info.followers_count) + ","
@@ -110,13 +122,6 @@ def extract_info_features(filepath, classification):
     #geo_enabled
     resultString += str( "1" if info.geo_enabled else "0" ) + ","
     
-    #create features from user description
-    if use_nlp :
-      if info.lang[:2] == "en" and ( info.description is not None ) : # only add user with descriptions in English
-        resultString += str(info.description.encode('ascii', 'ignore')).translate( None, ',') + ","
-        # pprint.pprint( classification + " " + info.name + " ==> " + str(info.description.encode('ascii', 'ignore')).translate( None, ',') )
-      else :
-        return ""       
     return resultString
 
 if __name__ == "__main__":
@@ -127,6 +132,7 @@ if __name__ == "__main__":
   filename = "data_nlp.csv"
   
   with open(filename, 'w') as newFile:
+    cont = 0
     for directory in os.listdir("verified/"):
       featureString = ""
       infoFeatures = ""
@@ -140,13 +146,16 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("verified/"+directory+"/"+file, "verified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("verified/"+directory+"/"+file, "verified").rstrip()
+      
+      #case the user data is incomplete, skip this user
       if infoFeatures == "" or tweetsFeatures == "" :
         continue
       pprint.pprint(directory)
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
-      break
-      
+      cont = cont + 1
+      if cont > 50 :
+        break
     for directory in os.listdir("unverified/"):
       featureString = ""
       infoFeatures = ""
@@ -160,9 +169,10 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("unverified/"+directory+"/"+file, "unverified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("unverified/"+directory+"/"+file, "unverified").rstrip()
+      
+      #case the user data is incomplete, skip this user
       if infoFeatures == "" or tweetsFeatures == "" :
         continue 
       featureString = infoFeatures + tweetsFeatures
       pprint.pprint(directory)
       newFile.write(featureString+"\n")
-      break
