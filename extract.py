@@ -20,14 +20,15 @@ features from the tweets
 - lang (machine-detected language of the Tweet text)
 - text ( The actual UTF-8 text of the status update ) 
 """
-use_nlp = True #extract natural language features from the description
-transformer = TfidfTransformer() 
+use_nlp = True #add user description as a column in the data file
 
 def extract_tweets_features(filepath, classification):
-
   file = open(filepath, 'rb')
-  unpickler = pickle.Unpickler(file)
-
+  try:
+    unpickler = pickle.Unpickler(file)
+  except EOFError:
+    return ""
+  
   hashtag_count = 0
   symbols_count = 0
   urls_count = 0
@@ -44,7 +45,7 @@ def extract_tweets_features(filepath, classification):
 
   for tweet_count in range(1, 200):
     try:
-      tweet = unpickler.load()
+      tweet = unpickler.load()   
       # num hashtags
       hashtag_count += len(tweet.entities['hashtags'])
       # num symbols
@@ -60,7 +61,9 @@ def extract_tweets_features(filepath, classification):
     except EOFError:
       pprint.pprint(tweet_count)
       break
-
+    except Exception, e:
+      pprint.pprint("bug twitter" + filepath)
+      return ""
   hashtag_avg = hashtag_count / float(tweet_count)
   symbols_avg = symbols_avg / float(tweet_count)
   urls_avg = urls_avg / float(tweet_count)
@@ -79,13 +82,19 @@ def extract_tweets_features(filepath, classification):
   
   
 def extract_info_features(filepath, classification):
+  
   if classification == "verified":
     resultString = "1,"
   else:
     resultString = "0,"
 
   with open(filepath, 'rb') as file:
-    info = pickle.load(file)
+    try:
+      info = pickle.load(file)     
+    except Exception, e:
+      pprint.pprint("bug in" + filepath)
+      return ""
+    
     #followers_count
     resultString += str(info.followers_count) + ","
     #friends_count
@@ -103,19 +112,19 @@ def extract_info_features(filepath, classification):
     
     #create features from user description
     if use_nlp :
-      if info.lang == "en" and ( info.description is not None ) : # only add user with descriptions in English
-        resultString + str(info.description.encode('ascii', 'ignore')).translate( None, ',') + ","
+      if info.lang[:2] == "en" and ( info.description is not None ) : # only add user with descriptions in English
+        resultString += str(info.description.encode('ascii', 'ignore')).translate( None, ',') + ","
         # pprint.pprint( classification + " " + info.name + " ==> " + str(info.description.encode('ascii', 'ignore')).translate( None, ',') )
       else :
-        return ""         
+        return ""       
     return resultString
 
 if __name__ == "__main__":
   
   #create csv file
   filename = "data.csv"
-  if use_nlp :
-    filename = "data_nlp.csv"
+  # if use_nlp :
+  filename = "data_nlp.csv"
   
   with open(filename, 'w') as newFile:
     for directory in os.listdir("verified/"):
@@ -131,10 +140,13 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("verified/"+directory+"/"+file, "verified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("verified/"+directory+"/"+file, "verified").rstrip()
-      if featureString == "" or tweetsFeatures == "" :
+      if infoFeatures == "" or tweetsFeatures == "" :
         continue
+      pprint.pprint(directory)
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
+      break
+      
     for directory in os.listdir("unverified/"):
       featureString = ""
       infoFeatures = ""
@@ -148,7 +160,9 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("unverified/"+directory+"/"+file, "unverified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("unverified/"+directory+"/"+file, "unverified").rstrip()
-      if featureString == "" or tweetsFeatures == "" :
+      if infoFeatures == "" or tweetsFeatures == "" :
         continue 
       featureString = infoFeatures + tweetsFeatures
+      pprint.pprint(directory)
       newFile.write(featureString+"\n")
+      break

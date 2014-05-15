@@ -16,44 +16,64 @@ from sklearn import tree
 from sklearn import svm, datasets
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import auc
+from sklearn.feature_extraction.text import CountVectorizer
 
-names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"]
-#model_type  = "adaboost" # adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
+
+# models available: adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
+model_types = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"]
+model_types = ["adaboost"]
+
 cv_folds = 10 #number of cross validation folds
 use_CV = True #use cross validation
 create_PR = False
+use_nlp = True #use natural language processing analysis
 
+if not use_nlp:
+  training_data = np.genfromtxt('traindata.csv', delimiter=',')
+  np.random.shuffle(training_data)
+  training_X = training_data[:,1:] 
+  training_Y = training_data[:,0]
 
-training_data = np.genfromtxt('traindata.csv', delimiter=',')
-np.random.shuffle(training_data)
 testing_data = np.genfromtxt('testdata.csv', delimiter=',')
-
-training_X = training_data[:,1:19]
-training_Y = training_data[:,0]
-
-testing_X = testing_data[:,1:19]
+testing_X = testing_data[:,1:]
 testing_Y = testing_data[:,0]
 
+#add nlp features
+if use_nlp :
+  nlp_features_columns = [8]
+  #TODO change that 
+  use_CV = True
+  deletethis = pd.read_table('data_nlp.csv', delimiter=',', dtype=None)
+  pprint.pprint( deletethis )
+  training_data = np.array( deletethis )
+  pprint.pprint( training_data )
+  np.random.shuffle(training_data)
+  training_X = training_data[:,nlp_features_columns]
+  training_Y = training_data[:,0]
+  pprint.pprint( training_X )
+  ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1, 2), min_df=1)
+  counts = ngram_vectorizer.fit_transform(training_X[:,0] )
+  pprint.pprint( ngram_vectorizer.get_feature_names() )
+  training_X = counts.toarray()
+
 if use_CV :
-    print 'Cross validation table'
-    for name in names :
-        if name == "svm" :
-            clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
-        if name == "adaboost" :
-            clf = AdaBoostClassifier(n_estimators=200)
-        if name == "stochastic_gradient_descent" :
-            clf = SGDClassifier(loss="hinge", penalty="l2")
-        if name == "nearestneighbor" :
-            clf = NearestCentroid()
-        if name == "decision_tree" :
-            clf = tree.DecisionTreeClassifier()
-        a = {}
-        a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
-        print name,a[name]
+  print 'Cross validation table'
+  for name in names :
+    if name == "svm" :
+      clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
+    if name == "adaboost" :
+      clf = AdaBoostClassifier(n_estimators=200)
+    if name == "stochastic_gradient_descent" :
+      clf = SGDClassifier(loss="hinge", penalty="l2")
+    if name == "nearestneighbor" :
+      clf = NearestCentroid()
+    if name == "decision_tree" :
+      clf = tree.DecisionTreeClassifier()
+    a = {}
+    a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
+    print name,a[name]
 
-
-#pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
-
+      #pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
 else :
   pprint.pprint( clf.fit(training_X, training_Y).score(testing_X , testing_Y) )
 if create_PR:
