@@ -17,29 +17,30 @@ from sklearn import svm, datasets
 from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import auc
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.externals import joblib
 
-
-# models available: adaboost / svm / stochastic_gradient_descent / nearestneighbor / decision_tree ...
-model_types = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"]
-model_types = ["adaboost"]
-
+#possible names = "adaboost" , "stochastic_gradient_descent" , "nearestneighbor", "decision_tree" 
+names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"] #classifiers used for cross validation
+name = "adaboost" #classifier used for testing
 cv_folds = 10 #number of cross validation folds
-use_CV = True #use cross validation
-create_PR = False
-use_nlp = True #use natural language processing analysis
+use_CV = False #use cross validation
+create_PR = False #Precision Recall
+save_Classifer = True 
+use_nlp = False #use natural language processing analysis
 
-if not use_nlp:
-  training_data = np.genfromtxt('traindata.csv', delimiter=',')
-  np.random.shuffle(training_data)
-  training_X = training_data[:,1:] 
-  training_Y = training_data[:,0]
-
+training_data = np.genfromtxt('traindata.csv', delimiter=',')
+np.random.shuffle(training_data)
 testing_data = np.genfromtxt('testdata.csv', delimiter=',')
-testing_X = testing_data[:,1:]
+
+training_X = training_data[:,1:19]
+training_Y = training_data[:,0]
+
+testing_X = testing_data[:,1:19]
 testing_Y = testing_data[:,0]
 
-#add nlp features
-if use_nlp :
+
+#add nlp features (under construction)
+if use_nlp : 
   nlp_features_columns = [8]
   #TODO change that 
   use_CV = True
@@ -58,6 +59,7 @@ if use_nlp :
 
 if use_CV :
   print 'Cross validation table'
+  a = {}
   for name in names :
     if name == "svm" :
       clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
@@ -69,13 +71,26 @@ if use_CV :
       clf = NearestCentroid()
     if name == "decision_tree" :
       clf = tree.DecisionTreeClassifier()
-    a = {}
+
     a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
     print name,a[name]
 
-      #pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
-else :
+else:
+  if name == "svm" :
+    clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
+  if name == "adaboost" :
+    clf = AdaBoostClassifier(n_estimators=200)
+  if name == "stochastic_gradient_descent" :
+    clf = SGDClassifier(loss="hinge", penalty="l2")
+  if name == "nearestneighbor" :
+    clf = NearestCentroid()
+  if name == "decision_tree" :
+    clf = tree.DecisionTreeClassifier()
   pprint.pprint( clf.fit(training_X, training_Y).score(testing_X , testing_Y) )
+  
+if save_Classifer:
+  joblib.dump(clf, name+'_classifier.pkl', compress=3)
+
 if create_PR:
   # Run classifier
   probas_ = clf.fit(training_X, training_Y).predict_proba(testing_X)
