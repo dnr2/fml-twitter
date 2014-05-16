@@ -19,6 +19,8 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import auc
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.externals import joblib
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 #possible names = "svm", "adaboost" , "stochastic_gradient_descent" , "nearestneighbor", "decision_tree" 
 # names = ["adaboost","stochastic_gradient_descent","nearestneighbor","decision_tree"] #classifiers used for cross validation
@@ -28,8 +30,10 @@ cv_folds = 5 #number of cross validation folds
 use_CV = False #use cross validation
 create_PR = False #Precision Recall
 save_Classifer = False 
+
 use_nlp = True #use natural language processing analysis
 num_nlp_columns = 3
+use_tfidf = True #use natural language term-frequency inverse document-frequency feature
 
 training_data = np.genfromtxt('traindata.csv', delimiter=',')
 np.random.shuffle(training_data)
@@ -45,29 +49,31 @@ testing_Y = testing_data[:,0]
 if use_nlp :
 
   #TODO using CV while I don't split nlp data into training and testing, must change that later
+  #do not shuffle the data...
   use_CV = True  
-  training_data  = np.array( pd.read_csv( 'data_nlp.csv', sep=',', quotechar="\"", na_values="nan", keep_default_na=False ))
+  training_data  = np.array( pd.read_csv( 'data_nlp.csv', sep=',', quotechar="\"", na_values="nan", keep_default_na=False ))  
 
   training_X = training_data[:,(num_nlp_columns+1):].astype(float)
   training_Y = training_data[:,0].astype(float)  
   
-  for col in range( 1, num_nlp_columns + 1 ) :    
+  for col in range( 1, num_nlp_columns + 1 ):
     nlp_features = training_data[:,col]
-    # pprint.pprint( nlp_features )
-    for line in range(0,nlp_features.shape[0] ) :
-      if isinstance( nlp_features[line], float) :
-        pprint.pprint( line )
-        pprint.pprint( nlp_features[line] )
-    
     ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,2), min_df=1)
+    # ngram_vectorizer = CountVectorizer(analyzer='word', min_df=1)
     counts = ngram_vectorizer.fit_transform( nlp_features )
     new_features = np.array(counts.toarray()).astype(float)    
     if col == 1 :
       training_X = new_features
     else :
       training_X = np.concatenate( (training_X , new_features ), axis = 1)
-    pprint.pprint( training_X.shape )  
-  
+    pprint.pprint( training_X.shape )
+ 
+  if use_tfidf :
+    transformer = TfidfTransformer()
+    training_X = transformer.fit_transform(training_X).toarray()
+    pprint.pprint( training_X.shape )
+ 
+#use cross validation and grid search 
 if use_CV :
   print 'Cross validation table'
   a = {}
@@ -85,7 +91,8 @@ if use_CV :
 
     a[name] = [np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))]
     print name,a[name]
-
+    
+#use test data
 else:
   if name == "svm" :
     clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True )
