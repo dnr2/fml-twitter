@@ -9,7 +9,7 @@ import time
 from sklearn.feature_extraction.text import TfidfTransformer
 
 """
-NLP FEATURES: 
+NLP FEATURES:
 
 features from the user:
 - description
@@ -19,9 +19,9 @@ features from the user:
 
 features from the tweets
 - lang (machine-detected language of the Tweet text)
-- text ( The actual UTF-8 text of the status update ) 
+- text ( The actual UTF-8 text of the status update )
 """
-use_nlp = True #add user description as a column in the data file
+use_nlp = False #add user description as a column in the data file
 
 
 #remove undesired characters
@@ -37,7 +37,7 @@ def extract_tweets_features(filepath, classification):
     unpickler = pickle.Unpickler(file)
   except EOFError:
     return ""
-  
+
   hashtag_count = 0
   symbols_count = 0
   urls_count = 0
@@ -54,7 +54,7 @@ def extract_tweets_features(filepath, classification):
 
   for tweet_count in range(1, 200):
     try:
-      tweet = unpickler.load()   
+      tweet = unpickler.load()
       # num hashtags
       hashtag_count += len(tweet.entities['hashtags'])
       # num symbols
@@ -88,10 +88,10 @@ def extract_tweets_features(filepath, classification):
                 + str(retweet_count) + "," + str(retweet_avg))
 
   return resultString
-  
-  
+
+
 def extract_info_features(filepath, classification):
-  
+
   if classification == "verified":
     resultString = "1,"
   else:
@@ -99,13 +99,14 @@ def extract_info_features(filepath, classification):
 
   with open(filepath, 'rb') as file:
     try:
-      info = pickle.load(file)     
+      info = pickle.load(file)
     except Exception, e:
       pprint.pprint("bug in" + filepath)
       return ""
-      
+
     #create features from user description
     if use_nlp :
+<<<<<<< Updated upstream
       if info.lang[:2] == "en" : # only add user with descriptions in English 
         description = clean_string( info.description if (info.description is not None) else "" )
         screen_name = clean_string( info.screen_name if (info.screen_name is not None) else ""  )
@@ -115,11 +116,20 @@ def extract_info_features(filepath, classification):
         resultString += screen_name + ","
         resultString += user_name + ","
         
+=======
+      if info.lang[:2] == "en" and ( info.description is not None ) : # only add user with descriptions in English
+        description = str(info.description.encode('ascii', 'ignore'))
+        #remove undesired characters
+        description = description.replace(",","").replace('\n','').replace("\r","").replace("\t","")
+
+        resultString += description + ","
+        # pprint.pprint( classification + " " + info.name + " ==> " + str(info.description.encode('ascii', 'ignore')).translate( None, ',') )
+>>>>>>> Stashed changes
       else :
         return ""
-    
+
     #followers_count
-    resultString += str(info.followers_count) + ","
+    # resultString += str(info.followers_count) + ","
     #friends_count
     resultString += str(info.friends_count) + ","
     #listed_count
@@ -132,21 +142,24 @@ def extract_info_features(filepath, classification):
     resultString += str( (info.created_at - datetime.datetime.strptime("1 Nov 05", "%d %b %y")).days ) + ","
     #geo_enabled
     resultString += str( "1" if info.geo_enabled else "0" ) + ","
-    
+
     return resultString
 
 if __name__ == "__main__":
-  
+
   #create csv file
   filename = "data.csv"
-  # if use_nlp :
-  filename = "data_nlp.csv"
-  
+  if use_nlp :
+    filename = "data_nlp.csv"
+
   with open(filename, 'w') as newFile:
+<<<<<<< Updated upstream
     
     #TODO REMOVE!
     cont = 0
     
+=======
+>>>>>>> Stashed changes
     for directory in os.listdir("verified/"):
       featureString = ""
       infoFeatures = ""
@@ -160,13 +173,14 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("verified/"+directory+"/"+file, "verified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("verified/"+directory+"/"+file, "verified").rstrip()
-      
+
       #case the user data is incomplete, skip this user
       if infoFeatures == "" or tweetsFeatures == "" :
         continue
       pprint.pprint(directory)
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
+<<<<<<< Updated upstream
       
       #TODO REMOVE!
       cont = cont + 1
@@ -176,6 +190,8 @@ if __name__ == "__main__":
     #TODO REMOVE!
     cont = 0
     
+=======
+>>>>>>> Stashed changes
     for directory in os.listdir("unverified/"):
       featureString = ""
       infoFeatures = ""
@@ -189,10 +205,9 @@ if __name__ == "__main__":
             infoFeatures = extract_info_features("unverified/"+directory+"/"+file, "unverified").rstrip()
           if fileName.endswith("_tweets"):
             tweetsFeatures = extract_tweets_features("unverified/"+directory+"/"+file, "unverified").rstrip()
-      
       #case the user data is incomplete, skip this user
       if infoFeatures == "" or tweetsFeatures == "" :
-        continue 
+        continue
       featureString = infoFeatures + tweetsFeatures
       pprint.pprint(directory)
       newFile.write(featureString+"\n")
