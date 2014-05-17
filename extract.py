@@ -21,7 +21,7 @@ features from the tweets
 - lang (machine-detected language of the Tweet text)
 - text ( The actual UTF-8 text of the status update )
 """
-use_nlp = False #add user description as a column in the data file
+use_nlp = True #add user description as a column in the data file
 
 
 #remove undesired characters
@@ -143,13 +143,6 @@ if __name__ == "__main__":
     filename = "data_nlp.csv"
 
   with open(filename, 'w') as newFile:
-<<<<<<< Updated upstream
-
-    #TODO REMOVE!
-    cont = 0
-
-=======
->>>>>>> Stashed changes
     for directory in os.listdir("verified/"):
       featureString = ""
       infoFeatures = ""
@@ -170,18 +163,6 @@ if __name__ == "__main__":
       pprint.pprint(directory)
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
-<<<<<<< Updated upstream
-
-      #TODO REMOVE!
-      cont = cont + 1
-      if cont > 2000 :
-        break
-
-    #TODO REMOVE!
-    cont = 0
-
-=======
->>>>>>> Stashed changes
     for directory in os.listdir("unverified/"):
       featureString = ""
       infoFeatures = ""
@@ -201,8 +182,3 @@ if __name__ == "__main__":
       featureString = infoFeatures + tweetsFeatures
       pprint.pprint(directory)
       newFile.write(featureString+"\n")
-
-      #TODO REMOVE!
-      cont = cont + 1
-      if cont > 2000 :
-        break
