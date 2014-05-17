@@ -31,7 +31,7 @@ def classify(name, pr):
   use_CV = False #use cross validation
   save_Classifer = False
 
-  use_nlp = False #use natural language processing analysis
+  use_nlp = True #use natural language processing analysis
   num_nlp_columns = 3
   use_tfidf = False #use natural language term-frequency inverse document-frequency feature
 

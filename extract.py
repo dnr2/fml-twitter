@@ -30,7 +30,7 @@ def clean_string( my_str ) :
   ret = ret.replace(",","").replace('\n','').replace("\r","").replace("\t","").replace("\"","")
   ret = "\"" + ret + "\""
   return ret
-  
+
 def extract_tweets_features(filepath, classification):
   file = open(filepath, 'rb')
   try:
@@ -106,25 +106,15 @@ def extract_info_features(filepath, classification):
 
     #create features from user description
     if use_nlp :
-<<<<<<< Updated upstream
-      if info.lang[:2] == "en" : # only add user with descriptions in English 
+      if info.lang[:2] == "en" : # only add user with descriptions in English
         description = clean_string( info.description if (info.description is not None) else "" )
         screen_name = clean_string( info.screen_name if (info.screen_name is not None) else ""  )
         user_name = clean_string( info.name if (info.name is not None) else "" )
-        
-        resultString += description + ","        
-        resultString += screen_name + ","
-        resultString += user_name + ","
-        
-=======
-      if info.lang[:2] == "en" and ( info.description is not None ) : # only add user with descriptions in English
-        description = str(info.description.encode('ascii', 'ignore'))
-        #remove undesired characters
-        description = description.replace(",","").replace('\n','').replace("\r","").replace("\t","")
 
         resultString += description + ","
-        # pprint.pprint( classification + " " + info.name + " ==> " + str(info.description.encode('ascii', 'ignore')).translate( None, ',') )
->>>>>>> Stashed changes
+        resultString += screen_name + ","
+        resultString += user_name + ","
+
       else :
         return ""
 
@@ -154,10 +144,10 @@ if __name__ == "__main__":
 
   with open(filename, 'w') as newFile:
 <<<<<<< Updated upstream
-    
+
     #TODO REMOVE!
     cont = 0
-    
+
 =======
 >>>>>>> Stashed changes
     for directory in os.listdir("verified/"):
@@ -181,15 +171,15 @@ if __name__ == "__main__":
       featureString = infoFeatures + tweetsFeatures
       newFile.write(featureString+"\n")
 <<<<<<< Updated upstream
-      
+
       #TODO REMOVE!
       cont = cont + 1
       if cont > 2000 :
         break
-    
+
     #TODO REMOVE!
     cont = 0
-    
+
 =======
 >>>>>>> Stashed changes
     for directory in os.listdir("unverified/"):
@@ -211,7 +201,7 @@ if __name__ == "__main__":
       featureString = infoFeatures + tweetsFeatures
       pprint.pprint(directory)
       newFile.write(featureString+"\n")
-      
+
       #TODO REMOVE!
       cont = cont + 1
       if cont > 2000 :

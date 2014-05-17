@@ -44,5 +44,10 @@ def process_user(user):
       for tweet in tweepy.Cursor(api.user_timeline,screen_name=user.screen_name).items(200):
         pickler.dump(tweet)
 
+
+cont = 0
 for friend in tweepy.Cursor(api.friends, id="verified").items():
-  process_user(friend)
+  cont = cont + 1
+  if(cont > 3000):
+    print cont
+    process_user(friend)
