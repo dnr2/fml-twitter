@@ -63,11 +63,17 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
 
   testing_X = testing_data[:,num_nlp_columns+1:].astype(float)
   testing_Y = testing_data[:,0].astype(float)
-
+  
+  if combine_numerical_nlp and not use_CV :
+    nlp_training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
+    nlp_testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
+    
   #add nlp features (under construction)
   if use_nlp :
     nlp_training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
     nlp_testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
+    MultinomialNB(alpha=1.0, class_prior=None, fit_prior=True)
+    
     training_X = nlp_training_X
     testing_X = nlp_testing_X
     
@@ -95,8 +101,8 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
   #use cross validation and grid search
   if use_CV :
     print 'Using Cross Validation'
+    pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
     
-    pprint.pprint( clf.fit(training_X, training_Y).score(testing_X, testing_Y) )
     if not name == "svm" and not name =="nearest_neighbor" and not name == "MultinomialNB":
       print clf.feature_importances_
     if(pr == True):
@@ -107,7 +113,7 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
   else:
     print 'Using Test Validation'
     
-    np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))
+    pprint.pprint( clf.fit(training_X, training_Y).score(testing_X, testing_Y) )
     if(pr == True):
       y_true, y_pred = testing_Y, clf.fit(training_X, training_Y).predict(testing_X)
       return y_true, y_pred
