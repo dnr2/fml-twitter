@@ -8,6 +8,7 @@ from sklearn import cross_validation
 from sklearn import datasets
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.metrics import confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
 
 '''
 
@@ -35,11 +36,9 @@ feature #3  listed_count          0.869025215563
 '''
 
 
-model_type  = "adaboost" # adaboost / svm / ...
 
 features = [
-"verified",
-"followers_count",
+"",
 "friends_count",
 "listed_count",
 "statuses_count",
@@ -64,16 +63,15 @@ sorted_features  = []
 
 training_data = np.array(pd.read_csv('data_train.csv', sep=',', quotechar='"', na_values="nan", keep_default_na=False))
 
-for column in range( 4, 22 ) :
-  print features[column]
+for column in range( 1, 19 ) :
+  # print features[column]
+  print column
   # get only one column of the training data
-  feature_array  = training_data[:,[column]].astype(float)
+  feature_array  = training_data[:,[column+4]].astype(float)
   class_array = training_data[:,0].astype(float)
 
-  if model_type == "svm" :
-    clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True ).fit(feature_array, class_array)
-  if model_type == "adaboost" :
-    clf = AdaBoostClassifier(n_estimators=200)
+  #using random forest becaues it is best classifier
+  clf = RandomForestClassifier(n_estimators=100)
 
   accuracy =  np.mean(cross_validation.cross_val_score(clf, feature_array, class_array, cv=10))
   sorted_features.append( ( accuracy, features[column] , column) );
@@ -104,5 +102,5 @@ pl.ylabel('True label')
 pl.xlabel('Predicted label')
 pl.show()
 
-for tup in sorted_features:
-  print "feature #" + str(tup[2]) + " " + str(tup[1]) + "\t" + str(tup[0])
+# for tup in sorted_features:
+#   print "feature #" + str(tup[2]) + " " + str(tup[1]) + "\t" + str(tup[0])

@@ -6,6 +6,7 @@ import csv
 import sqlite3
 import math
 
+from sklearn.naive_bayes import GaussianNB
 from sklearn import preprocessing
 from sklearn import svm
 from sklearn import cross_validation
@@ -50,7 +51,7 @@ def classify(name, pr, use_CV):
   cv_folds = 10 #number of cross validation folds
   save_Classifer = False
 
-  use_nlp = False #use natural language processing analysis
+  use_nlp = True #use natural language processing analysis
   num_nlp_columns = 3
   use_tfidf = False #use natural language term-frequency inverse document-frequency feature
 
@@ -75,9 +76,9 @@ def classify(name, pr, use_CV):
     #linear SVC
     if name == "svm" :
       clf = svm.SVC(kernel='linear', degree=3, cache_size=1000)
-    #KNeighbors
+    #Naive Bayes
     if name == "nearest_centroid":
-      clf = NearestCentroid()
+      clf = GaussianNB()
     #Ensemble Methods
     if name == "adaboost" :
       clf = AdaBoostClassifier(n_estimators=100)
