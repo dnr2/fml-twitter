@@ -119,7 +119,7 @@ def extract_info_features(filepath, classification):
         return ""
 
     #followers_count
-    # resultString += str(info.followers_count) + ","
+    resultString += str(info.followers_count) + ","
     #friends_count
     resultString += str(info.friends_count) + ","
     #listed_count
