@@ -6,6 +6,7 @@ import csv
 import sqlite3
 import math
 
+from sklearn.naive_bayes import GaussianNB
 from sklearn import preprocessing
 from sklearn import svm
 from sklearn import cross_validation
@@ -51,7 +52,6 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf):
   names = ["adaboost"] #classifiers used for cross validation
   cv_folds = 10 #number of cross validation folds
   save_Classifer = False
-  
   num_nlp_columns = 3
 
   training_data = np.array(pd.read_csv('data_train.csv', sep=',', quotechar='"', na_values="nan", keep_default_na=False))
@@ -79,9 +79,9 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf):
     #linear SVC
     if name == "svm" :
       clf = svm.SVC(kernel='linear', degree=3, cache_size=1000)
-    #KNeighbors
+    #Naive Bayes
     if name == "nearest_centroid":
-      clf = NearestCentroid()
+      clf = GaussianNB()
     #Ensemble Methods
     if name == "adaboost" :
       clf = AdaBoostClassifier(n_estimators=100)
