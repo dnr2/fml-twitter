@@ -27,27 +27,27 @@ from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
 
-def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf) :
+def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf, n_grams) :
   
   for col in nlp_columns:    
-    ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,1), min_df=3)
+    ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,n_grams), min_df=3)
     ngram_vectorizer.fit( data_fit[:,col] )
     counts = ngram_vectorizer.transform( data_transform[:,col] )
     new_features = np.array(counts.toarray()).astype(float)
     if col == 1 :
       extracted = new_features
     else :
-      extracted = np.concatenate( (extracted , new_features ), axis = 1)
-    pprint.pprint( extracted.shape )
+      extracted = np.concatenate( (extracted , new_features ), axis = 1)    
 
   if use_tfidf :
     transformer = TfidfTransformer()
     extracted = transformer.fit_transform(extracted).toarray()
-    pprint.pprint( extracted.shape )
+  
+  pprint.pprint( extracted.shape )
   return extracted
 
 
-def classify(name, pr, use_CV, use_nlp, use_tfidf):
+def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams):
   #possible names = "svm", "adaboost" , "stochastic_gradient_descent" , "nearestneighbor", "decision_tree"
   names = ["adaboost"] #classifiers used for cross validation
   cv_folds = 10 #number of cross validation folds
@@ -65,33 +65,33 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf):
 
   #add nlp features (under construction)
   if use_nlp :
-    training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf)
-    testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf)
+    training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
+    testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
   
-  scaler = preprocessing.StandardScaler()
-  training_X = scaler.fit_transform(training_X)
-  testing_X = scaler.transform(testing_X)
+  ##Choose classifier
+  #linear SVC
+  if name == "svm" :
+    scaler = preprocessing.StandardScaler()
+    training_X = scaler.fit_transform(training_X)
+    testing_X = scaler.transform(testing_X)
+    clf = svm.SVC(kernel='linear', degree=3, cache_size=1000)
+  #Naive Bayes
+  if name == "MultinomialNB":
+    clf = MultinomialNB(alpha=1.0, class_prior=None, fit_prior=True)
+  #Ensemble Methods
+  if name == "adaboost" :
+    clf = AdaBoostClassifier(n_estimators=100)
+  if name == "random_forest" :
+    clf = RandomForestClassifier(n_estimators=100)
+  if name == "decision_tree" :
+    clf = tree.DecisionTreeClassifier()
   
   #use cross validation and grid search
   if use_CV :
     print 'Using Cross Validation'
-    ##Choose classifier
-    #linear SVC
-    if name == "svm" :
-      clf = svm.SVC(kernel='linear', degree=3, cache_size=1000)
-    #Naive Bayes
-    if name == "nearest_centroid":
-      clf = GaussianNB()
-    #Ensemble Methods
-    if name == "adaboost" :
-      clf = AdaBoostClassifier(n_estimators=100)
-    if name == "random_forest" :
-      clf = RandomForestClassifier(n_estimators=100)
-    if name == "decision_tree" :
-      clf = tree.DecisionTreeClassifier()
-
+    
     pprint.pprint( clf.fit(training_X, training_Y).score(testing_X, testing_Y) )
-    if not name == "svm" and not name =="nearest_neighbor" and not name == "nearest_centroid":
+    if not name == "svm" and not name =="nearest_neighbor" and not name == "MultinomialNB":
       print clf.feature_importances_
     if(pr == True):
       y_true, y_pred = testing_Y, clf.fit(training_X, training_Y).predict(testing_X)
@@ -100,21 +100,7 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf):
   #use test data
   else:
     print 'Using Test Validation'
-    ##Choose classifier
-    #linear SVC
-    if name == "svm" :
-      clf = svm.SVC(kernel='linear', degree=3, cache_size=1000)
-    #KNeighbors
-    if name == "nearest_centroid":
-      clf = NearestCentroid()
-    #Ensemble Methods
-    if name == "adaboost" :
-      clf = AdaBoostClassifier(n_estimators=100)
-    if name == "random_forest" :
-      clf = RandomForestClassifier(n_estimators=100)
-    if name == "decision_tree" :
-      clf = tree.DecisionTreeClassifier()
-
+    
     np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))
     if(pr == True):
       y_true, y_pred = testing_Y, clf.fit(training_X, training_Y).predict(testing_X)
