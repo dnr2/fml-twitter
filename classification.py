@@ -24,12 +24,14 @@ from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import MultinomialNB
 
-def extract_nlp( nlp_columns, data , use_tfidf) :
-  for col in nlp_columns:
-    nlp_features = data[:,col]
-    ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,3), min_df=3)
-    counts = ngram_vectorizer.fit_transform( nlp_features )
+def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf) :
+  
+  for col in nlp_columns:    
+    ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,1), min_df=3)
+    ngram_vectorizer.fit( data_fit[:,col] )
+    counts = ngram_vectorizer.transform( data_transform[:,col] )
     new_features = np.array(counts.toarray()).astype(float)
     if col == 1 :
       extracted = new_features
@@ -44,15 +46,13 @@ def extract_nlp( nlp_columns, data , use_tfidf) :
   return extracted
 
 
-def classify(name, pr, use_CV):
+def classify(name, pr, use_CV, use_nlp, use_tfidf):
   #possible names = "svm", "adaboost" , "stochastic_gradient_descent" , "nearestneighbor", "decision_tree"
   names = ["adaboost"] #classifiers used for cross validation
   cv_folds = 10 #number of cross validation folds
   save_Classifer = False
-
-  use_nlp = False #use natural language processing analysis
+  
   num_nlp_columns = 3
-  use_tfidf = False #use natural language term-frequency inverse document-frequency feature
 
   training_data = np.array(pd.read_csv('data_train.csv', sep=',', quotechar='"', na_values="nan", keep_default_na=False))
   testing_data = np.array(pd.read_csv('data_test.csv', sep=',', quotechar='"', na_values="nan", keep_default_na=False))
@@ -65,9 +65,13 @@ def classify(name, pr, use_CV):
 
   #add nlp features (under construction)
   if use_nlp :
-    training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, use_tfidf)
-    testing_X = extract_nlp( range(1,num_nlp_columns+1), testing_data, use_tfidf)
-
+    training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf)
+    testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf)
+  
+  scaler = preprocessing.StandardScaler()
+  training_X = scaler.fit_transform(training_X)
+  testing_X = scaler.transform(testing_X)
+  
   #use cross validation and grid search
   if use_CV :
     print 'Using Cross Validation'
@@ -86,18 +90,12 @@ def classify(name, pr, use_CV):
     if name == "decision_tree" :
       clf = tree.DecisionTreeClassifier()
 
-    scaler = preprocessing.StandardScaler()
-    training_X = scaler.fit_transform(training_X)
-    testing_X = scaler.transform(testing_X)
-
     pprint.pprint( clf.fit(training_X, training_Y).score(testing_X, testing_Y) )
     if not name == "svm" and not name =="nearest_neighbor" and not name == "nearest_centroid":
       print clf.feature_importances_
     if(pr == True):
       y_true, y_pred = testing_Y, clf.fit(training_X, training_Y).predict(testing_X)
       return y_true, y_pred
-
-
 
   #use test data
   else:
@@ -116,10 +114,6 @@ def classify(name, pr, use_CV):
       clf = RandomForestClassifier(n_estimators=100)
     if name == "decision_tree" :
       clf = tree.DecisionTreeClassifier()
-
-    scaler = preprocessing.StandardScaler()
-    training_X = scaler.fit_transform(training_X)
-    testing_X = scaler.transform(testing_X)
 
     np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds))
     if(pr == True):
