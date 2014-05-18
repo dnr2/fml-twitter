@@ -26,6 +26,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import classification_report
 
 def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf, n_grams) :
   
@@ -47,7 +48,7 @@ def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf, n_grams) :
   return extracted
 
 
-def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams):
+def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nlp):
   #possible names = "svm", "adaboost" , "stochastic_gradient_descent" , "nearestneighbor", "decision_tree"
   names = ["adaboost"] #classifiers used for cross validation
   cv_folds = 10 #number of cross validation folds
@@ -65,9 +66,11 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams):
 
   #add nlp features (under construction)
   if use_nlp :
-    training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
-    testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
-  
+    nlp_training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
+    nlp_testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
+    training_X = nlp_training_X
+    testing_X = nlp_testing_X
+    
   ##Choose classifier
   #linear SVC
   if name == "svm" :
@@ -85,6 +88,9 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams):
     clf = RandomForestClassifier(n_estimators=100)
   if name == "decision_tree" :
     clf = tree.DecisionTreeClassifier()
+  
+   
+    
   
   #use cross validation and grid search
   if use_CV :
@@ -108,3 +114,7 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams):
 
   if save_Classifer:
     joblib.dump(clf, name+'_classifier.pkl', compress=3)
+
+if __name__ == "__main__" :
+  test_true, test_predict = classify(name="decision_tree", pr=True, use_CV=True, use_nlp=True, use_tfidf=True, n_grams=3, combine_numerical_nlp=True)
+  print(classification_report(test_true, test_predict))
