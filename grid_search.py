@@ -62,14 +62,13 @@ features = [
 
 sorted_features  = []
 
-training_data = np.genfromtxt('data.csv', delimiter=',')
-np.random.shuffle(training_data)
+training_data = np.array(pd.read_csv('data_train.csv', sep=',', quotechar='"', na_values="nan", keep_default_na=False))
 
-for column in range( 1, 20 ) :
+for column in range( 4, 22 ) :
   print features[column]
   # get only one column of the training data
-  feature_array  = training_data[:,[column]]
-  class_array = training_data[:,0]
+  feature_array  = training_data[:,[column]].astype(float)
+  class_array = training_data[:,0].astype(float)
 
   if model_type == "svm" :
     clf = svm.SVC( kernel="poly", C=10, degree=3, verbose=True ).fit(feature_array, class_array)

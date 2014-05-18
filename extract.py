@@ -95,7 +95,7 @@ def extract_info_features(filepath, classification):
   if classification == "verified":
     resultString = "1,"
   else:
-    resultString = "0,"
+    resultString = "1,"
 
   with open(filepath, 'rb') as file:
     try:
