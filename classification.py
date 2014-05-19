@@ -29,8 +29,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.metrics import classification_report
 
 def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf, n_grams) :
-  
-  for col in nlp_columns:    
+
+  for col in nlp_columns:
     ngram_vectorizer = CountVectorizer(analyzer='char_wb', ngram_range=(1,n_grams), min_df=3)
     ngram_vectorizer.fit( data_fit[:,col] )
     counts = ngram_vectorizer.transform( data_transform[:,col] )
@@ -38,12 +38,12 @@ def extract_nlp( nlp_columns, data_fit, data_transform, use_tfidf, n_grams) :
     if col == 1 :
       extracted = new_features
     else :
-      extracted = np.concatenate( (extracted , new_features ), axis = 1)    
+      extracted = np.concatenate( (extracted , new_features ), axis = 1)
 
   if use_tfidf :
     transformer = TfidfTransformer()
     extracted = transformer.fit_transform(extracted).toarray()
-  
+
   pprint.pprint( extracted.shape )
   return extracted
 
@@ -59,24 +59,25 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
   testing_data = np.array(pd.read_csv('data_test.csv', sep=',', quotechar='"', na_values="nan", keep_default_na=False))
 
   training_X = training_data[:,num_nlp_columns+1:].astype(float)
+  print training_X.shape
   training_Y = training_data[:,0].astype(float)
 
   testing_X = testing_data[:,num_nlp_columns+1:].astype(float)
   testing_Y = testing_data[:,0].astype(float)
-  
+
   if combine_numerical_nlp and not use_CV :
     nlp_training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
     nlp_testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
-    
+
   #add nlp features (under construction)
   if use_nlp :
     nlp_training_X = extract_nlp( range(1,num_nlp_columns+1), training_data, training_data, use_tfidf, n_grams)
     nlp_testing_X = extract_nlp( range(1,num_nlp_columns+1), training_data, testing_data, use_tfidf, n_grams)
     MultinomialNB(alpha=1.0, class_prior=None, fit_prior=True)
-    
+
     training_X = nlp_training_X
     testing_X = nlp_testing_X
-    
+
   ##Choose classifier
   #linear SVC
   if name == "svm" :
@@ -94,17 +95,17 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
     clf = RandomForestClassifier(n_estimators=100)
   if name == "decision_tree" :
     clf = tree.DecisionTreeClassifier()
-  
-   
-    
-  
+
+
+
+
   #use cross validation and grid search
   if use_CV :
     print 'Using Cross Validation'
     pprint.pprint( np.mean(cross_validation.cross_val_score(clf, training_X, training_Y, cv=cv_folds)) )
-    
+
     if not name == "svm" and not name =="nearest_neighbor" and not name == "MultinomialNB":
-      print clf.feature_importances_
+      print clf.fit(training_X, training_Y).feature_importances_
     if(pr == True):
       y_true, y_pred = testing_Y, clf.fit(training_X, training_Y).predict(testing_X)
       return y_true, y_pred
@@ -112,7 +113,7 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
   #use test data
   else:
     print 'Using Test Validation'
-    
+
     pprint.pprint( clf.fit(training_X, training_Y).score(testing_X, testing_Y) )
     if(pr == True):
       y_true, y_pred = testing_Y, clf.fit(training_X, training_Y).predict(testing_X)
