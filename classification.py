@@ -96,9 +96,6 @@ def classify(name, pr, use_CV, use_nlp, use_tfidf, n_grams, combine_numerical_nl
   if name == "decision_tree" :
     clf = tree.DecisionTreeClassifier()
 
-
-
-
   #use cross validation and grid search
   if use_CV :
     print 'Using Cross Validation'
